@@ -44,6 +44,26 @@
     opacity: 1;
   }
 
+  /* Visible scrollbar for similar movies section */
+  .scrollbar-visible::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .scrollbar-visible::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+
+  .scrollbar-visible::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #14b8a6, #06b6d4);
+    border-radius: 4px;
+  }
+
+  .scrollbar-visible::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #0d9488, #0891b2);
+  }
+
   /* Line clamp utilities */
   .line-clamp-1 {
     overflow: hidden;

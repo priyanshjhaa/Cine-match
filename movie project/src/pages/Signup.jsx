@@ -1,7 +1,8 @@
 // ✅ SIGNUP PAGE - Handles user registration
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'  // 🎣 Get auth functions - NOW ENABLED
+import toast from 'react-hot-toast'
+import { useAuth } from '../hooks/useAuth'
 import Header from '../components/Header.jsx'
 
 function Signup() {
@@ -38,11 +39,13 @@ function Signup() {
       await signup(email, password, name)    // This creates the Firebase account
       
       console.log('✅ Signup successful! Redirecting to home page...')
+      toast.success('Account created successfully! Welcome to CineMatch! 🎬')
       navigate('/')                           // Redirect to home page on success
       
     } catch (error) {
       // 🚨 HANDLE ERRORS
       console.error('❌ Signup error:', error)
+      toast.error('Failed to create account. Please try again.')
       setError('Failed to create account: ' + error.message)
     } finally {
       // 🏁 CLEANUP - Always runs regardless of success/failure

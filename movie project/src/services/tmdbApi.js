@@ -4,6 +4,92 @@ const TMDB_API_BASE_URL = 'https://api.themoviedb.org/3';
 // Debug logging
 console.log('TMDB API KEY loaded:', import.meta.env.VITE_TMDB_API_KEY ? 'Yes' : 'No');
 
+// Get movie trailers/videos
+export const getMovieVideos = async (movieId) => {
+  try {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) {
+      throw new Error('TMDB API key not found');
+    }
+
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${apiKey}`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`TMDB API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Filter for YouTube trailers
+    const trailers = data.results?.filter(
+      video => video.site === 'YouTube' && video.type === 'Trailer'
+    ) || [];
+    
+    // Return the first official trailer, or any trailer
+    const officialTrailer = trailers.find(t => t.official) || trailers[0];
+    
+    return officialTrailer;
+  } catch (error) {
+    console.error('Error fetching movie videos:', error);
+    return null;
+  }
+};
+
+// Get similar movies
+export const getSimilarMovies = async (movieId) => {
+  try {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) {
+      throw new Error('TMDB API key not found');
+    }
+
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/similar?api_key=${apiKey}&page=1`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`TMDB API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform to match our movie format
+    const movies = data.results?.slice(0, 15).map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path 
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+      backdrop_path: movie.backdrop_path
+        ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+        : null,
+      rating: movie.vote_average?.toFixed(1) || 'N/A',
+      year: movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A',
+      genre: movie.genre_ids?.[0] ? getGenreName(movie.genre_ids[0]) : 'Unknown',
+      overview: movie.overview || 'No overview available.'
+    })) || [];
+    
+    return movies;
+  } catch (error) {
+    console.error('Error fetching similar movies:', error);
+    return [];
+  }
+};
+
+// Helper function to get genre name
+const getGenreName = (genreId) => {
+  const genres = {
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
+    80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family',
+    14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music',
+    9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi', 10770: 'TV Movie',
+    53: 'Thriller', 10752: 'War', 37: 'Western'
+  };
+  return genres[genreId] || 'Unknown';
+};
+
 // Get streaming providers for a movie
 export const getStreamingProviders = async (movieId) => {
   try {

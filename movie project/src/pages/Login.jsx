@@ -1,7 +1,8 @@
 // 🔑 LOGIN PAGE - Handles user authentication
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'  // 🎣 Get auth functions - NOW ENABLED
+import toast from 'react-hot-toast'
+import { useAuth } from '../hooks/useAuth'
 import Header from '../components/Header.jsx'
 
 function Login() {
@@ -29,11 +30,13 @@ function Login() {
       await login(email, password)     // This calls Firebase authentication
       
       console.log('✅ Login successful! Redirecting to home page...')
+      toast.success('Welcome back! 👋')
       navigate('/')                     // Redirect to home page on success
       
     } catch (error) {
       // 🚨 HANDLE ERRORS
       console.error('❌ Login error:', error)
+      toast.error('Failed to log in. Please check your credentials.')
       setError('Failed to log in: ' + error.message)
     } finally {
       // 🏁 CLEANUP - Always runs regardless of success/failure
