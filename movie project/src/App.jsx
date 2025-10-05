@@ -32,12 +32,17 @@ function HomeContent() {
     e.preventDefault()
     e.stopPropagation()
     
+    console.log('💗 Heart button clicked for:', movie.title, 'ID:', movie.id)
+    
     if (!currentUser) {
+      console.log('❌ User not logged in, redirecting to login')
       window.location.href = '/login'
       return
     }
     
     const isFav = isFavorite(movie.id)
+    console.log('🔍 Is favorited?', isFav)
+    
     if (isFav) {
       removeFromFavorites(movie.id)
     } else {
@@ -116,11 +121,14 @@ function HomeContent() {
   }
 
   const handleMoodSubmit = (mood) => {
+    console.log('🎬 handleMoodSubmit called with:', mood);
     setMoodResult(mood)
     setShowMoodQuiz(false)
+    console.log('✅ Mood quiz closed, result set');
   }
 
   const closeMoodResult = () => {
+    console.log('❌ Closing mood results');
     setMoodResult(null)
   }
 
@@ -181,13 +189,13 @@ function HomeContent() {
       {showMoodQuiz && (
         <QuickMoodQuiz 
           onClose={() => setShowMoodQuiz(false)}
-          onSubmit={handleMoodSubmit}
+          onMoodDetected={handleMoodSubmit}
         />
       )}
 
       {moodResult && (
         <FastMoodRecommendations 
-          mood={moodResult}
+          moodResult={moodResult}
           onClose={closeMoodResult}
         />
       )}

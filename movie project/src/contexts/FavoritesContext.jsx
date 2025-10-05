@@ -53,12 +53,17 @@ export const FavoritesProvider = ({ children }) => {
 
   // Add to favorites with optimistic update
   const addToFavorites = async (movie) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('❌ Cannot add favorite: User not logged in');
+      return;
+    }
+
+    console.log('➕ Adding to favorites:', movie.title);
 
     // Optimistic update
     const newFavorite = {
       id: `temp-${movie.id}`,
-      movieId: movie.id,
+      movieId: Number(movie.id), // Ensure it's stored as a number
       title: movie.title,
       poster_path: movie.poster_path,
       backdrop_path: movie.backdrop_path,
@@ -73,7 +78,7 @@ export const FavoritesProvider = ({ children }) => {
     try {
       const favoritesRef = collection(db, 'users', currentUser.uid, 'favorites');
       await addDoc(favoritesRef, {
-        movieId: movie.id,
+        movieId: Number(movie.id), // Ensure it's stored as a number
         title: movie.title,
         poster_path: movie.poster_path,
         backdrop_path: movie.backdrop_path,
@@ -83,8 +88,9 @@ export const FavoritesProvider = ({ children }) => {
         overview: movie.overview,
         addedAt: new Date().toISOString()
       });
+      console.log('✅ Added to favorites successfully');
     } catch (error) {
-      console.error('Error adding favorite:', error);
+      console.error('❌ Error adding favorite:', error);
       // Revert optimistic update on error
       setFavorites(prev => prev.filter(f => f.id !== newFavorite.id));
     }
@@ -92,22 +98,28 @@ export const FavoritesProvider = ({ children }) => {
 
   // Remove from favorites with optimistic update
   const removeFromFavorites = async (movieId) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('❌ Cannot remove favorite: User not logged in');
+      return;
+    }
+
+    console.log('➖ Removing from favorites, movieId:', movieId);
 
     // Optimistic update
     const originalFavorites = [...favorites];
-    setFavorites(prev => prev.filter(f => f.movieId !== movieId));
+    setFavorites(prev => prev.filter(f => Number(f.movieId) !== Number(movieId)));
 
     try {
       const favoritesRef = collection(db, 'users', currentUser.uid, 'favorites');
-      const q = query(favoritesRef, where('movieId', '==', movieId));
+      const q = query(favoritesRef, where('movieId', '==', Number(movieId))); // Ensure numeric comparison
       const querySnapshot = await getDocs(q);
       
       querySnapshot.forEach(async (document) => {
         await deleteDoc(doc(db, 'users', currentUser.uid, 'favorites', document.id));
       });
+      console.log('✅ Removed from favorites successfully');
     } catch (error) {
-      console.error('Error removing favorite:', error);
+      console.error('❌ Error removing favorite:', error);
       // Revert optimistic update on error
       setFavorites(originalFavorites);
     }
@@ -115,7 +127,10 @@ export const FavoritesProvider = ({ children }) => {
 
   // Check if movie is favorited
   const isFavorite = (movieId) => {
-    return favorites.some(fav => fav.movieId === movieId);
+    // Convert both to numbers for comparison to handle type mismatches
+    const result = favorites.some(fav => Number(fav.movieId) === Number(movieId));
+    console.log(`🔍 Checking if movie ${movieId} is favorite:`, result, 'Favorites:', favorites.map(f => f.movieId));
+    return result;
   };
 
   const value = {

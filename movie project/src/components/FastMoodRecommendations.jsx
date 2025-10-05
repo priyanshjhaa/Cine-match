@@ -16,19 +16,24 @@ const MOOD_GENRES = {
   contemplative: [18, 99, 9648] // Drama, Documentary, Mystery
 }
 
-const FastMoodRecommendations = ({ moodResult }) => {
+const FastMoodRecommendations = ({ moodResult, onClose }) => {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [streamingData, setStreamingData] = useState({})
 
   useEffect(() => {
+    console.log('🎭 Mood recommendations - moodResult:', moodResult);
     if (moodResult?.mood) {
+      console.log('🎬 Fetching movies for mood:', moodResult.mood);
       fetchMovies(moodResult.mood)
+    } else {
+      console.log('❌ No mood found in moodResult');
     }
   }, [moodResult])
 
   const fetchMovies = async (mood) => {
+    console.log('📡 Starting fetch for mood:', mood);
     setLoading(true)
     setError(null)
     
@@ -36,12 +41,20 @@ const FastMoodRecommendations = ({ moodResult }) => {
       const API_KEY = import.meta.env.VITE_TMDB_API_KEY
       const genres = MOOD_GENRES[mood] || MOOD_GENRES.happy
       
+      console.log('🎯 Using genres:', genres);
+      
       const response = await fetch(
         `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genres.join(',')}&sort_by=popularity.desc&vote_average.gte=6.0&language=en-US&page=1`
       )
       
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
       const data = await response.json()
+      console.log('📦 API response:', data);
       const movieResults = data.results?.slice(0, 12) || []
+      console.log('✅ Found', movieResults.length, 'movies');
       setMovies(movieResults)
 
       // Fetch streaming data for each movie
@@ -134,10 +147,23 @@ const FastMoodRecommendations = ({ moodResult }) => {
   }
 
   return (
-    <div className="py-8">
+    <div className="py-8 relative">
+      {/* Close button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 p-2 bg-red-500/80 hover:bg-red-600 rounded-full text-white transition-all"
+          title="Close recommendations"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+      
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">
-          Perfect for your {moodResult.mood} mood!
+          Perfect for your {moodResult.mood} mood! 🎬
         </h2>
         <p className="text-gray-300">Here are some great recommendations with streaming info</p>
       </div>

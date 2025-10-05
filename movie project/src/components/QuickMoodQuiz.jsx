@@ -1,14 +1,23 @@
 // Quick and fast mood quiz - optimized for speed
 import React, { useState } from 'react'
 
-const QuickMoodQuiz = ({ onMoodDetected }) => {
+const QuickMoodQuiz = ({ onMoodDetected, onClose }) => {
   const [selectedMood, setSelectedMood] = useState(null)
 
   // Quick mood detection with just one question
   const handleMoodSelection = (mood) => {
     setSelectedMood(mood)
+    console.log('🎭 Mood selected:', mood);
     // Immediately send the result
-    onMoodDetected({ mood, confidence: 100 })
+    if (onMoodDetected) {
+      onMoodDetected({ mood, confidence: 100 })
+    }
+    // Close the quiz after a short delay to show feedback
+    setTimeout(() => {
+      if (onClose) {
+        onClose()
+      }
+    }, 500)
   }
 
   if (selectedMood) {
@@ -29,7 +38,20 @@ const QuickMoodQuiz = ({ onMoodDetected }) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-6 relative">
+      {/* Close button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 z-50 p-2 bg-red-500/80 hover:bg-red-600 rounded-full text-white transition-all"
+          title="Close"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+      
       <div className="text-center mb-8">
         <h3 className="text-2xl font-bold text-white mb-4">
           How are you feeling right now?

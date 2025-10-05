@@ -11,8 +11,15 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 }
 
+console.log('🔥 Initializing Firebase...')
+console.log('Firebase Project ID:', firebaseConfig.projectId)
+
 const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+
+console.log('✅ Firebase initialized successfully')
+console.log('Auth:', auth ? 'Ready' : 'Failed')
+console.log('Firestore:', db ? 'Ready' : 'Failed')
 
 export default app
