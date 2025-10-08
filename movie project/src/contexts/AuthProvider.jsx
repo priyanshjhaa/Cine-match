@@ -1,10 +1,4 @@
-// ========================================
-// AUTH FUNCTIONALITY - COMMENTED OUT FOR NOW
-// This file contains Firebase authentication setup
-// Will be activated when implementing user features
-// ========================================
 
-// AuthProvider - ONLY component exports for Fast Refresh
 import React, { useState, useEffect } from 'react'
 import { 
   signInWithEmailAndPassword,

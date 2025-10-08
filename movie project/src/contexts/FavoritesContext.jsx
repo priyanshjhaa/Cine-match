@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { collection, onSnapshot, query, addDoc, deleteDoc, doc, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const FavoritesContext = createContext();
 
@@ -27,11 +28,32 @@ export const FavoritesProvider = ({ children }) => {
     }
 
     setLoading(true);
+    
+    // Safety timeout to prevent infinite loading if Firestore query is blocked
+    const timeoutId = setTimeout(() => {
+      console.error('⏰ Firestore query timeout after 10 seconds');
+      console.error('❌ This usually means Firestore security rules are missing or incorrect');
+      console.error('📋 Please add these rules in Firebase Console → Firestore Database → Rules:');
+      console.error(`
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/favorites/{favoriteId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+      `);
+      setLoading(false);
+      setFavorites([]);
+    }, 10000); // 10 second timeout
+
     const favoritesRef = collection(db, 'users', currentUser.uid, 'favorites');
     const q = query(favoritesRef);
 
     const unsubscribe = onSnapshot(q, 
       (snapshot) => {
+        clearTimeout(timeoutId);
         const favs = [];
         snapshot.forEach((doc) => {
           favs.push({
@@ -39,16 +61,34 @@ export const FavoritesProvider = ({ children }) => {
             ...doc.data()
           });
         });
+        console.log(`✅ Loaded ${favs.length} favorites from Firestore`);
         setFavorites(favs);
         setLoading(false);
       },
       (error) => {
-        console.error('Error fetching favorites:', error);
+        clearTimeout(timeoutId);
+        console.error('❌ Firestore error fetching favorites:', error);
+        console.error('🔒 Check if Firestore security rules are configured correctly');
+        console.error('📋 Required rules:');
+        console.error(`
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/favorites/{favoriteId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+        `);
         setLoading(false);
+        setFavorites([]);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, [currentUser]);
 
   // Add to favorites with optimistic update
@@ -89,8 +129,22 @@ export const FavoritesProvider = ({ children }) => {
         addedAt: new Date().toISOString()
       });
       console.log('✅ Added to favorites successfully');
+      toast.success(`Added "${movie.title}" to favorites!`);
     } catch (error) {
       console.error('❌ Error adding favorite:', error);
+      
+      // Show user-friendly error based on error code
+      if (error.code === 'permission-denied') {
+        toast.error('Permission denied. Firestore rules not configured!');
+        console.error('🔒 FIRESTORE SECURITY RULES MISSING!');
+        console.error('📋 Follow the instructions in FIRESTORE_SETUP.md');
+        console.error('🔗 Or check the console for the required rules');
+      } else if (error.code === 'unavailable') {
+        toast.error('Firestore service unavailable. Check internet connection.');
+      } else {
+        toast.error('Failed to add to favorites. Check console for details.');
+      }
+      
       // Revert optimistic update on error
       setFavorites(prev => prev.filter(f => f.id !== newFavorite.id));
     }
@@ -118,8 +172,18 @@ export const FavoritesProvider = ({ children }) => {
         await deleteDoc(doc(db, 'users', currentUser.uid, 'favorites', document.id));
       });
       console.log('✅ Removed from favorites successfully');
+      toast.success('Removed from favorites');
     } catch (error) {
       console.error('❌ Error removing favorite:', error);
+      
+      // Show user-friendly error
+      if (error.code === 'permission-denied') {
+        toast.error('Permission denied. Firestore rules not configured!');
+        console.error('🔒 FIRESTORE SECURITY RULES MISSING!');
+      } else {
+        toast.error('Failed to remove from favorites');
+      }
+      
       // Revert optimistic update on error
       setFavorites(originalFavorites);
     }
