@@ -168,34 +168,42 @@ const FastMoodRecommendations = ({ moodResult, onClose }) => {
         <p className="text-gray-300">Here are some great recommendations with streaming info</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 px-4">
         {movies.map((movie) => (
           <Link
             key={movie.id}
             to={`/movie/${movie.id}`}
-            className="group block"
+            className="group relative rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-teal-500/20"
           >
-            <div className="bg-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:bg-white/10">
-              <img
-                src={movie.poster_path 
-                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
-                  : '/placeholder-movie.jpg'
-                }
-                alt={movie.title}
-                className="w-full h-64 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-white font-semibold mb-1 line-clamp-2">
-                  {movie.title}
-                </h3>
-                <p className="text-gray-400 text-sm mb-2">
-                  ⭐ {movie.vote_average?.toFixed(1)} • {movie.release_date?.split('-')[0]}
-                </p>
+            <div className="aspect-[2/3] bg-gradient-to-br from-teal-900 to-cyan-900">
+              {movie.poster_path ? (
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white text-4xl">
+                  🎬
+                </div>
+              )}
+            </div>
+            
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h3 className="text-white text-sm font-bold mb-2 line-clamp-2">{movie.title}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-yellow-400 text-sm">★</span>
+                  <span className="text-white text-xs">{movie.vote_average?.toFixed(1)}</span>
+                  <span className="text-white/60 text-xs">• {movie.release_date?.split('-')[0]}</span>
+                </div>
                 
                 {/* Streaming availability */}
                 <StreamingInfo movieId={movie.id} />
               </div>
             </div>
+
+            <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-teal-400/50 transition-all duration-300"></div>
           </Link>
         ))}
       </div>

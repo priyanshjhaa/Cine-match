@@ -84,8 +84,8 @@ function HomeContent() {
 
     try {
       setLoading(true)
-      const results = await searchMovies(searchQuery)
-      setMovies(results || [])
+      const data = await searchMovies(searchQuery)
+      setMovies(data.results || [])
     } catch (error) {
       console.error('Error searching movies:', error)
     } finally {
@@ -201,6 +201,87 @@ function HomeContent() {
       )}
 
       <div className='pb-16'>
+        {searchQuery && (
+          <div className='mb-16'>
+            <div className='flex items-center justify-between px-4 mb-6'>
+              <div className='flex items-center gap-3'>
+                <div className='w-1 h-8 bg-gradient-to-b from-teal-400 to-cyan-500 rounded-full'></div>
+                <h2 className='text-white text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text'>
+                  Search Results
+                </h2>
+              </div>
+              <div className='flex-1 h-px bg-gradient-to-r from-teal-400/50 to-transparent ml-4'></div>
+              <div className='text-teal-400 text-sm font-medium'>
+                {movies.length} {movies.length === 1 ? 'Result' : 'Results'}
+              </div>
+            </div>
+            
+            {loading ? (
+              <SkeletonGrid count={20} variant="default" />
+            ) : movies.length === 0 ? (
+              <div className='text-center py-20'>
+                <div className='text-8xl mb-6'>🔍</div>
+                <h2 className='text-3xl font-bold text-white mb-4'>
+                  No movies found
+                </h2>
+                <p className='text-gray-400 text-lg mb-8'>
+                  Try searching for something else
+                </p>
+              </div>
+            ) : (
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 px-4'>
+                {movies.map((movie) => (
+                  <Link
+                    key={movie.id}
+                    to={`/movie/${movie.id}`}
+                    className='group relative rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-teal-500/20'
+                  >
+                    <div className='aspect-[2/3] bg-gradient-to-br from-teal-900 to-cyan-900'>
+                      {movie.poster_path ? (
+                        <img
+                          src={movie.poster_path}
+                          alt={movie.title}
+                          className='w-full h-full object-cover'
+                        />
+                      ) : (
+                        <div className='w-full h-full flex items-center justify-center text-white text-4xl'>
+                          🎬
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                      <div className='absolute bottom-0 left-0 right-0 p-4'>
+                        <h3 className='text-white text-sm font-bold mb-2 line-clamp-2'>{movie.title}</h3>
+                        <div className='flex items-center gap-2 mb-2'>
+                          <span className='text-yellow-400 text-sm'>★</span>
+                          <span className='text-white text-xs'>{movie.rating}</span>
+                          <span className='text-white/60 text-xs'>• {movie.year}</span>
+                        </div>
+                        <span className='inline-block px-2 py-1 bg-teal-500/20 border border-teal-400/30 rounded-full text-xs text-teal-300'>
+                          {movie.genre}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={(e) => handleQuickFavorite(e, movie)}
+                      className='absolute top-2 right-2 z-10 p-2 bg-black/70 backdrop-blur-md rounded-full text-white hover:bg-black/90 transition-all opacity-0 group-hover:opacity-100'
+                      title={isFavorite(movie.id) ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <svg className="w-5 h-5 transition-all" fill={isFavorite(movie.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </button>
+
+                    <div className='absolute inset-0 rounded-xl border border-transparent group-hover:border-teal-400/50 transition-all duration-300'></div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
         {!searchQuery && (
           <div className='mb-16'>
             <div className='flex items-center justify-between px-4 mb-6'>

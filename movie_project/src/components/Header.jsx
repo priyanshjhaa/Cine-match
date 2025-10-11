@@ -31,7 +31,7 @@ function Header({ rightActions }) {
 
   if (rightActions) {
     return (
-      <header className="w-full px-3 sm:px-4 py-3 flex items-center justify-between z-40 bg-transparent">
+      <header className="w-full px-3 sm:px-4 py-3 flex items-center justify-between z-50 bg-transparent relative">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
@@ -48,7 +48,7 @@ function Header({ rightActions }) {
   }
 
   return (
-    <header className="w-full px-3 sm:px-4 py-3 flex items-center justify-between z-40 bg-transparent">
+    <header className="w-full px-3 sm:px-4 py-3 flex items-center justify-between z-50 bg-transparent relative">
       <div className="flex items-center gap-3">
         <Link to="/" className="flex items-center gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
@@ -62,7 +62,7 @@ function Header({ rightActions }) {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 px-3 py-2 bg-white/10 border border-teal-400/30 rounded-full hover:bg-white/20 transition-all"
+              className="flex items-center gap-2 px-3 py-2 bg-white/10 border border-teal-400/30 rounded-full hover:bg-white/20 transition-all relative z-50"
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
                 {currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase()}
@@ -76,7 +76,7 @@ function Header({ rightActions }) {
             </button>
 
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-[#0f1937] border border-teal-400/30 rounded-xl shadow-2xl overflow-hidden animate-fadeIn">
+              <div className="absolute right-0 mt-2 w-48 bg-[#0f1937] border border-teal-400/30 rounded-xl shadow-2xl overflow-hidden animate-fadeIn z-[100]">
                 <div className="px-4 py-3 border-b border-white/10">
                   <p className="text-white font-semibold text-sm">{currentUser.displayName || 'User'}</p>
                   <p className="text-gray-400 text-xs truncate">{currentUser.email}</p>
